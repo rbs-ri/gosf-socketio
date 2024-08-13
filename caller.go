@@ -18,7 +18,8 @@ var (
 	ErrorCallerMaxOneValue = errors.New("f should return not more than one value")
 )
 
-/**
+/*
+*
 Parses function passed by using reflection, and stores its representation
 for further call on message or ack
 */
@@ -50,14 +51,16 @@ func newCaller(f interface{}) (*caller, error) {
 	return curCaller, nil
 }
 
-/**
+/*
+*
 returns function parameter as it is present in it using reflection
 */
 func (c *caller) getArgs() interface{} {
 	return reflect.New(c.Args).Interface()
 }
 
-/**
+/*
+*
 calls function with given arguments from its representation using reflection
 */
 func (c *caller) callFunc(h *Channel, args interface{}) []reflect.Value {

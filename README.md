@@ -14,7 +14,7 @@ Examples directory contains simple client and server.
 ### Get It
 
 ```sh
-go get -u github.com/ambelovsky/gosf-socketio
+go get -u github.com/rbs-ri/gosf-socketio
 ```
 
 ### Simple server usage

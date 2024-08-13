@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/ambelovsky/gosf-socketio/protocol"
+	"github.com/rbs-ri/gosf-socketio/protocol"
 )
 
 const (
@@ -14,12 +14,14 @@ const (
 	OnError         = "error"
 )
 
-/**
+/*
+*
 System handler function for internal event processing
 */
 type systemHandler func(c *Channel)
 
-/**
+/*
+*
 Contains maps of message processing functions
 */
 type methods struct {
@@ -30,14 +32,16 @@ type methods struct {
 	onDisconnection systemHandler
 }
 
-/**
+/*
+*
 create messageHandlers map
 */
 func (m *methods) initMethods() {
 	//m.messageHandlers = make(sync.Map)
 }
 
-/**
+/*
+*
 Add message processing function, and bind it to given method
 */
 func (m *methods) On(method string, f interface{}) error {
@@ -50,7 +54,8 @@ func (m *methods) On(method string, f interface{}) error {
 	return nil
 }
 
-/**
+/*
+*
 Find message processing function associated with given method
 */
 func (m *methods) findMethod(method string) (*caller, bool) {
@@ -61,7 +66,13 @@ func (m *methods) findMethod(method string) (*caller, bool) {
 	return nil, false
 }
 
-func (m *methods) callLoopEvent(c *Channel, event string) {
+func (m *methods) callLoopEvent(c *Channel, event string, args ...interface{}) {
+	var err interface{}
+	if len(args) > 0 {
+		err = args[0]
+	} else {
+		err = nil
+	}
 	if m.onConnection != nil && event == OnConnection {
 		m.onConnection(c)
 	}
@@ -73,11 +84,11 @@ func (m *methods) callLoopEvent(c *Channel, event string) {
 	if !ok {
 		return
 	}
-
-	f.callFunc(c, &struct{}{})
+	f.callFunc(c, &err)
 }
 
-/**
+/*
+*
 Check incoming message
 On ack_resp - look for waiter
 On ack_req - look for processing function and send ack_resp
@@ -101,9 +112,7 @@ func (m *methods) processIncomingMessage(c *Channel, msg *protocol.Message) {
 		if err != nil {
 			return
 		}
-
 		f.callFunc(c, data)
-
 	case protocol.MessageTypeAckRequest:
 		f, ok := m.findMethod(msg.Method)
 		if !ok || !f.Out {
@@ -118,7 +127,6 @@ func (m *methods) processIncomingMessage(c *Channel, msg *protocol.Message) {
 			if err != nil {
 				return
 			}
-
 			result = f.callFunc(c, data)
 		} else {
 			result = f.callFunc(c, &struct{}{})
